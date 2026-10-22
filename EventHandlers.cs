@@ -1,4 +1,4 @@
-﻿using Exiled.API.Enums;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs;
@@ -22,7 +22,7 @@ namespace FlashbangGun
                 ev.IsAllowed = false;
 
                 // you can change to frag grenade if you want
-                ev.Player.ThrowGrenade(ProjectileType.Flashbang);
+                ev.Player.ThrowGrenade(ProjectileType.Scp018);
 
                 if (_plugin.Config.Debug)
                 {
