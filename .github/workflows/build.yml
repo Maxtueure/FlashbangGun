@@ -9,10 +9,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
       - uses: NuGet/setup-nuget@v2
-      - run: nuget restore packages.config -PackagesDirectory packages
+      - name: Restore EXILED
+        run: nuget restore packages.config -PackagesDirectory packages
+      - name: Get game references
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://exiled.host/build_deps/Dependencies.zip" -OutFile deps.zip
+          Expand-Archive deps.zip -DestinationPath deps_tmp
+          New-Item -ItemType Directory -Force refs | Out-Null
+          Get-ChildItem deps_tmp -Recurse -Filter *.dll | Copy-Item -Destination refs -Force
+      - name: Fix project paths
+        shell: pwsh
+        run: |
+          $p = Get-Content Flashbang45.csproj -Raw
+          $p = $p.Replace('..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed', 'refs')
+          $p = $p.Replace('..\packages\', 'packages\')
+          $p = $p.Replace('Include="Flashbang45.cs"', 'Include="FlashbangGun.cs"')
+          Set-Content Flashbang45.csproj $p
       - run: msbuild Flashbang45.csproj /p:Configuration=Release
-
       - uses: actions/upload-artifact@v4
         with:
           name: plugin
-          path: "**/bin/Release/*.dll"
+          path: bin/Release/Flashbang45.dll
