@@ -14,15 +14,18 @@ jobs:
       - name: Get game references
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://exiled.host/build_deps/Dependencies.zip" -OutFile deps.zip
-          Expand-Archive deps.zip -DestinationPath deps_tmp
-          New-Item -ItemType Directory -Force refs | Out-Null
-          Get-ChildItem deps_tmp -Recurse -Filter *.dll | Copy-Item -Destination refs -Force
+          choco install steamcmd -y
+          $dir = "$env:RUNNER_TEMP\slserver"
+          steamcmd +force_install_dir $dir +login anonymous +app_update 996560 validate +quit
+          steamcmd +force_install_dir $dir +login anonymous +app_update 996560 validate +quit
+          if (-not (Test-Path "$dir\SCPSL_Data\Managed\Assembly-CSharp.dll")) { throw "Game files not found" }
+          exit 0
       - name: Fix project paths
         shell: pwsh
         run: |
+          $managed = "$env:RUNNER_TEMP\slserver\SCPSL_Data\Managed"
           $p = Get-Content Flashbang45.csproj -Raw
-          $p = $p.Replace('..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed', 'refs')
+          $p = $p.Replace('..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed', $managed)
           $p = $p.Replace('..\packages\', 'packages\')
           $p = $p.Replace('Include="Flashbang45.cs"', 'Include="FlashbangGun.cs"')
           Set-Content Flashbang45.csproj $p
