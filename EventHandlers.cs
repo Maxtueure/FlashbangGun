@@ -22,7 +22,7 @@ namespace FlashbangGun
                 ev.IsAllowed = false;
 
                 // you can change to frag grenade if you want
-                ev.Player.ThrowGrenade(ProjectileType.Scp018);
+                ev.Player.ThrowGrenade(ProjectileType.FragGrenade);
 
                 if (_plugin.Config.Debug)
                 {
